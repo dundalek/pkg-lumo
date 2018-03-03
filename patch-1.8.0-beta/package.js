@@ -90,7 +90,7 @@ function patchRequire(compiler, options, callback) {
 
 var patches = [moveLibs, patchNodeGyp];
 
-patches.unshift(patchRequire);
+// patches.unshift(patchRequire);
 
 Promise.all(resources.map(deflate)).then(() => {
   embed(resources, 'target');
