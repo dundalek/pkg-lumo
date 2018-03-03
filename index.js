@@ -52,7 +52,7 @@ function writeFileAndDir(filePath, contents) {
 	fs.writeFileSync(filePath, contents);
     } else {
 	mkdirp.sync(dirname);
-	writeFileAndDir(filePath, contents);	
+	writeFileAndDir(filePath, contents);
     }
 }
 
@@ -117,6 +117,14 @@ function patchLumoSources() {
     copyPatch(path.join(patchDir, 'embed.js'), path.join(lumoSources, 'scripts', 'embed.js'));
 }
 
+function installLumoForAot() {
+  console.log(`Installing lumo-${lumoVersion} from npm...`);
+
+  var child_process = require('child_process');
+  child_process.execSync(`npm install lumo-cljs@${lumoVersion} --no-save`,
+    {stdio:[0,1,2]});
+}
+
 function bundle(options) {
     const tmpLumoDir = path.join(process.cwd(), 'lumo-' + lumoVersion);
     const emptyOptions = {mainNsName: '',
@@ -133,12 +141,12 @@ function bundle(options) {
 			  'static-fns': false,
 			  'elide-asserts': false,
 			  args: []};
-    
-    options = Object.assign(emptyOptions, options, {classpath: []});   
+
+    options = Object.assign(emptyOptions, options, {classpath: []});
     deleteIfExists(path.join(tmpLumoDir, 'target/bundle.min.js'));
     deleteIfExists(path.join(tmpLumoDir, 'target/bundle.js'));
     var child_process = require('child_process');
-    
+
     child_process.execSync(`node scripts/pkg-bundle.js '${JSON.stringify(options)}'`,
 			   {stdio:[0,1,2],
 			    cwd: tmpLumoDir});
@@ -185,12 +193,6 @@ function bundleResources(resourceDirsArray) {
 }
 
 function generateAOT(options) {
-    console.log(`Installing lumo-${lumoVersion} from npm...`);
-    
-    var child_process = require('child_process');
-    child_process.execSync(`npm install lumo-cljs@${lumoVersion} --no-save`,
-			   {stdio:[0,1,2]});
-    
     const isWindows = process.platform === 'win32';
     const aotTarget = path.join(process.cwd(), 'lumo-' + lumoVersion, 'target', 'aot');
 
@@ -220,7 +222,7 @@ function cleanUp() {
 		 binaryName,
 		 {overwrite: true});
 
-    rmdir.sync(path.join(process.cwd(), 'lumo-' + lumoVersion));
+    // rmdir.sync(path.join(process.cwd(), 'lumo-' + lumoVersion));
 	  console.log(`Finished building. Your nexe binary is called ${binaryName}`);
 }
 
@@ -228,11 +230,15 @@ exports.main = function main(res) {
     var resourceDirsArray = res.resourceDirs.split(':');
     resourceDirsArray = removeEmptyStringFromArray(resourceDirsArray);
 
-  rmdir.sync(path.join(process.cwd(), 'lumo-' + lumoVersion));
-	extractLumo();
-	patchLumoSources();
+  const lumoDir = path.join(process.cwd(), 'lumo-' + lumoVersion);
+  // rmdir.sync(lumoDir);
+  if (!fs.existsSync(lumoDir)) {
+    extractLumo();
+    patchLumoSources();
+    installLumoForAot();
+    bundleNodeModules();
+  }
 	bundle(res);
-	bundleNodeModules();
 	bundleResources(resourceDirsArray);
 	generateAOT(res);
 	packageNexe();
