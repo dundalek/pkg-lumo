@@ -225,8 +225,7 @@ function cleanUp() {
     });
 }
 
-inquirer.prompt(prompt).then(res => {
-
+exports.main = function main(res) {
     var resourceDirsArray = res.resourceDirs.split(':');
     resourceDirsArray = removeEmptyStringFromArray(resourceDirsArray);
 
@@ -240,4 +239,4 @@ inquirer.prompt(prompt).then(res => {
 	packageNexe();
 	cleanUp();
     });
-});
+}
