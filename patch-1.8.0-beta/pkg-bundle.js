@@ -59,6 +59,7 @@ const plugins = [
 	values: {
 	    'process.env.NODE_ENV': '"production"',
 	    'process.env.LUMO_VERSION': '"1.8.0-beta"',
+      'process.env.CLOSH_VERSION': "0.2.0",
 	},
     }),
     resolve({
