@@ -219,17 +219,16 @@ function cleanUp() {
     fse.moveSync(binaryLocation,
 		 binaryName,
 		 {overwrite: true});
-    
-    rmdir(path.join(process.cwd(), 'lumo-' + lumoVersion), error => {
-	console.log(`Finished building. Your nexe binary is called ${binaryName}`);
-    });
+
+    rmdir.sync(path.join(process.cwd(), 'lumo-' + lumoVersion));
+	  console.log(`Finished building. Your nexe binary is called ${binaryName}`);
 }
 
 exports.main = function main(res) {
     var resourceDirsArray = res.resourceDirs.split(':');
     resourceDirsArray = removeEmptyStringFromArray(resourceDirsArray);
 
-    rmdir(path.join(process.cwd(), 'lumo-' + lumoVersion), error => {
+  rmdir.sync(path.join(process.cwd(), 'lumo-' + lumoVersion));
 	extractLumo();
 	patchLumoSources();
 	bundle(res);
@@ -238,5 +237,4 @@ exports.main = function main(res) {
 	generateAOT(res);
 	packageNexe();
 	cleanUp();
-    });
 }
