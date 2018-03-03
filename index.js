@@ -11,6 +11,7 @@ const path = require('path');
 const rmdir = require('rimraf');
 const JSZip = require('jszip');
 const os = require('os');
+const child_process = require('child_process');
 
 const lumoVersion = '1.8.0-beta';
 const libDir = path.dirname(fs.realpathSync(__filename));
@@ -90,7 +91,6 @@ function extractLumo() {
 	}
     }
     console.log('installing lumo npm deps...');
-    var child_process = require('child_process');
     child_process.execSync('npm install',
 			   {stdio:[0,1,2],
 			    cwd: path.join(process.cwd(), 'lumo-' + lumoVersion)});
@@ -120,7 +120,6 @@ function patchLumoSources() {
 function installLumoForAot() {
   console.log(`Installing lumo-${lumoVersion} from npm...`);
 
-  var child_process = require('child_process');
   child_process.execSync(`npm install lumo-cljs@${lumoVersion} --no-save`,
     {stdio:[0,1,2]});
 }
@@ -145,7 +144,6 @@ function bundle(options) {
     options = Object.assign(emptyOptions, options, {classpath: []});
     deleteIfExists(path.join(tmpLumoDir, 'target/bundle.min.js'));
     deleteIfExists(path.join(tmpLumoDir, 'target/bundle.js'));
-    var child_process = require('child_process');
 
     child_process.execSync(`node scripts/pkg-bundle.js '${JSON.stringify(options)}'`,
 			   {stdio:[0,1,2],
@@ -159,7 +157,6 @@ function bundleNodeModules() {
 	    fse.moveSync('./node_modules', './node_modules_bak', {overwrite: true});
 	}
 	console.log('installing production node modules via `npm install --production`');
-	var child_process = require('child_process');
 	child_process.execSync(`npm install --production`, {stdio:[0,1,2]});
 	console.log('moveing node_modules to be bundled');
 	fse.moveSync('./node_modules',
@@ -206,7 +203,6 @@ function generateAOT(options) {
 function packageNexe() {
     const tmpLumoDir = path.join(process.cwd(), 'lumo-' + lumoVersion);
     console.log('Generateing the nexe executeable, this may take a while and consume a lot of memory.')
-    var child_process = require('child_process');
     child_process.execSync(`node scripts/package.js`,
 			   {stdio:[0,1,2],
 			    cwd: tmpLumoDir});
